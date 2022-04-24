@@ -1,0 +1,28 @@
+@startuml Database Schema
+    title Database Schema
+
+    entity audio {
+        id
+        name
+        url
+    }
+    entity folder {
+        id
+        name
+        cover
+    }
+    entity genre {
+        id
+        name
+    }
+    entity author {
+        id
+        name
+    }
+
+
+    author "n" -- "n" folder
+    folder "1" -- "n" audio
+    genre "n" -- "n" folder
+
+@enduml
