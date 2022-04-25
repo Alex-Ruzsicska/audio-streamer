@@ -1,7 +1,9 @@
 package main
 
 import (
-	"io"
+	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -9,11 +11,29 @@ import (
 func main() {
 	// Hello world, the web server
 
-	helloHandler := func(w http.ResponseWriter, req *http.Request) {
-		io.WriteString(w, "Hello, world!\n")
-	}
+	database, _ := sql.Open("sqlite3", "db/database.db")
+	
+	var songName string
+	database.QueryRow("SELECT url FROM audio where id = 1").Scan(&songName)
 
-	http.HandleFunc("/hello", helloHandler)
-    log.Println("Listing for requests at http://localhost:8000/hello")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	fmt.Println(songName)
+
+	// configure the songs directory name and port
+	const port = 8080
+
+	// add a handler for the song files
+	http.Handle("/", addHeaders(http.FileServer(http.Dir("mock/audios"))))
+	fmt.Printf("Starting server on %v\n", port)
+	log.Printf("Serving %s on HTTP port: %v\n", songName, port)
+
+	// serve and log errors
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), nil))
+}
+
+// addHeaders will act as middleware to give us CORS support
+func addHeaders(h http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		h.ServeHTTP(w, r)
+	}
 }

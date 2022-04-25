@@ -3,13 +3,14 @@
 
     entity audio {
         id
+        folder_id
         name
         url
     }
     entity folder {
         id
         name
-        cover
+        cover_url
     }
     entity genre {
         id
